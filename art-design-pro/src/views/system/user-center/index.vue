@@ -149,7 +149,8 @@
 <script setup lang="ts">
   import { useUserStore } from '@/store/modules/user'
   import type { FormInstance, FormRules } from 'element-plus'
-  import { fetchGetUserInfo } from '@/api/auth'
+  import { ElMessage } from 'element-plus'
+  import { fetchGetUserInfo, fetchUpdateUserInfo } from '@/api/user'
 
   defineOptions({ name: 'UserCenter' })
 
@@ -260,7 +261,31 @@
   /**
    * 切换用户信息编辑状态
    */
-  const edit = () => {
+  const edit = async () => {
+    if (isEdit.value) {
+      // 保存用户信息
+      try {
+        loading.value = true
+        await fetchUpdateUserInfo({
+          userId: '',
+          realName: form.realName,
+          username: form.nikeName,
+          email: form.email,
+          phone: form.mobile,
+          address: form.address,
+          sex: form.sex,
+          signature: form.des
+        })
+        // 更新成功后重新获取用户信息
+        await getUserInfo()
+        ElMessage.success('更新成功')
+      } catch (error) {
+        console.error('更新用户信息失败:', error)
+        ElMessage.error('更新失败，请稍后重试')
+      } finally {
+        loading.value = false
+      }
+    }
     isEdit.value = !isEdit.value
   }
 

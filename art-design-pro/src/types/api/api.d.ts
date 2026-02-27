@@ -64,7 +64,7 @@ declare namespace Api {
   namespace Auth {
     /** 登录参数 */
     interface LoginParams {
-      userName: string
+      username: string
       password: string
     }
 
@@ -74,24 +74,6 @@ declare namespace Api {
       refreshToken: string
     }
 
-    /** 用户信息 */
-    interface UserInfo {
-      realName?: string
-      username: string
-      buttons: string[]
-      roles: string[]
-      userId: number
-      email: string
-      avatar?: string
-      role?: string
-      sex?: string
-      signature?: string
-      phone?: string
-      address?: string
-      point?: number
-      createdAt?: string
-      updatedAt?: string
-    }
   }
 
   /** 系统管理类型 */
@@ -140,5 +122,46 @@ declare namespace Api {
       Pick<RoleListItem, 'roleId' | 'roleName' | 'roleCode' | 'description' | 'enabled'> &
         Api.Common.CommonSearchParams
     >
+  }
+
+  /** 用户中心类型 */
+  namespace User {
+    /** 用户信息 */
+    interface UserInfo {
+      realName?: string
+      username: string
+      buttons: string[]
+      roles: string[]
+      userId: number
+      email: string
+      avatar?: string
+      role?: string
+      sex?: string
+      signature?: string
+      phone?: string
+      address?: string
+      point?: number
+      createdAt?: string
+      updatedAt?: string
+    }
+
+    /** 更新用户信息参数 */
+    interface UpdateUserInfoParams {
+      userId: string
+      realName?: string
+      username?: string
+      email?: string
+      phone?: string
+      address?: string
+      sex?: string
+      signature?: string
+    }
+
+    /** 更新用户信息响应 */
+    interface UpdateUserInfoResponse {
+      code: number
+      msg: string
+      data: UserInfo
+    }
   }
 }
