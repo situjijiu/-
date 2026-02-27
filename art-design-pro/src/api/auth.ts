@@ -8,7 +8,10 @@ import request from '@/utils/http'
 export function fetchLogin(params: Api.Auth.LoginParams) {
   return request.post<Api.Auth.LoginResponse>({
     url: '/api/auth/login',
-    params
+    data: {
+      username: params.userName,
+      password: params.password
+    }
     // showSuccessMessage: true // 显示成功消息
     // showErrorMessage: false // 不显示错误消息
   })
