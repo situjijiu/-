@@ -163,5 +163,19 @@ declare namespace Api {
       msg: string
       data: UserInfo
     }
+
+    /** 修改密码参数 */
+    interface ChangePasswordParams {
+      oldPassword: string
+      newPassword: string
+      confirmPassword: string
+    }
+
+    /** 修改密码响应 */
+    interface ChangePasswordResponse {
+      code: number
+      msg: string
+      data?: any
+    }
   }
 }

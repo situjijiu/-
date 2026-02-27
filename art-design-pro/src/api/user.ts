@@ -25,3 +25,15 @@ export function fetchUpdateUserInfo(params: Api.User.UpdateUserInfoParams) {
     data: params
   })
 }
+
+/**
+ * 修改密码
+ * @param params 修改密码参数
+ * @returns 修改密码响应
+ */
+export function fetchChangePassword(params: Api.User.ChangePasswordParams) {
+  return request.put<Api.User.ChangePasswordResponse>({ 
+    url: "/api/user/password",
+    data: params
+  })
+}

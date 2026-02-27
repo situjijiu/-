@@ -106,7 +106,7 @@
         <div class="art-card-sm my-5">
           <h1 class="p-4 text-xl font-normal border-b border-g-300">更改密码</h1>
 
-          <ElForm :model="pwdForm" class="box-border p-5" label-width="86px" label-position="top">
+          <ElForm :model="pwdForm" class="box-border p-5" label-width="86px" label-position="top" ref="pwdFormRef" :rules="pwdRules">
             <ElFormItem label="当前密码" prop="password">
               <ElInput
                 v-model="pwdForm.password"
@@ -150,7 +150,7 @@
   import { useUserStore } from '@/store/modules/user'
   import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage } from 'element-plus'
-  import { fetchGetUserInfo, fetchUpdateUserInfo } from '@/api/user'
+import { fetchGetUserInfo, fetchUpdateUserInfo, fetchChangePassword } from '@/api/user'
 
   defineOptions({ name: 'UserCenter' })
 
@@ -161,6 +161,7 @@
   const isEditPwd = ref(false)
   const date = ref('')
   const ruleFormRef = ref<FormInstance>()
+  const pwdFormRef = ref<FormInstance>()
   const loading = ref(false)
 
   /**
@@ -201,6 +202,32 @@
     mobile: [{ required: true, message: '请输入手机号码', trigger: 'blur' }],
     address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
     sex: [{ required: true, message: '请选择性别', trigger: 'blur' }]
+  })
+
+  /**
+   * 密码表单验证规则
+   */
+  const pwdRules = reactive<FormRules>({
+    password: [
+      { required: true, message: '请输入当前密码', trigger: 'blur' }
+    ],
+    newPassword: [
+      { required: true, message: '请输入新密码', trigger: 'blur' },
+      { min: 6, message: '新密码长度至少为6位', trigger: 'blur' }
+    ],
+    confirmPassword: [
+      { required: true, message: '请确认新密码', trigger: 'blur' },
+      {
+        validator: (rule: any, value: string, callback: any) => {
+          if (value !== pwdForm.newPassword) {
+            callback(new Error('两次输入的密码不一致'))
+          } else {
+            callback()
+          }
+        },
+        trigger: 'blur'
+      }
+    ]
   })
 
   /**
@@ -292,7 +319,34 @@
   /**
    * 切换密码编辑状态
    */
-  const editPwd = () => {
+  const editPwd = async () => {
+    if (isEditPwd.value) {
+      // 表单验证
+      if (!pwdFormRef.value) return
+      await pwdFormRef.value.validate(async (valid) => {
+        if (valid) {
+          // 保存密码
+          try {
+            loading.value = true
+            await fetchChangePassword({
+              oldPassword: pwdForm.password,
+              newPassword: pwdForm.newPassword,
+              confirmPassword: pwdForm.confirmPassword
+            })
+            ElMessage.success('密码修改成功')
+            // 重置密码表单
+            pwdForm.password = ''
+            pwdForm.newPassword = ''
+            pwdForm.confirmPassword = ''
+          } catch (error) {
+            console.error('修改密码失败:', error)
+            ElMessage.error('修改密码失败，请稍后重试')
+          } finally {
+            loading.value = false
+          }
+        }
+      })
+    }
     isEditPwd.value = !isEditPwd.value
   }
 </script>
