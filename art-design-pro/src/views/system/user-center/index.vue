@@ -23,7 +23,7 @@
             </div>
             <div class="mt-2.5">
               <ArtSvgIcon icon="ri:map-pin-line" class="text-g-700" />
-              <span class="ml-2 text-sm">图书馆</span>
+              <span class="ml-2 text-sm">{{ userInfo.address || '暂无地址' }}</span>
             </div>
             <div class="mt-2.5">
               <ArtSvgIcon icon="ri:phone-line" class="text-g-700" />
@@ -214,7 +214,7 @@
   /**
    * 用户标签列表
    */
-  const lableList: Array<string> = ['专注设计', '很有想法', '辣~', '大长腿', '川妹子', '海纳百川']
+  const lableList: Array<string> = ['暂无数据', '。。。', '。。。']
 
   onMounted(() => {
     getDate()
