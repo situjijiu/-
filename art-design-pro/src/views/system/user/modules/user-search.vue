@@ -6,12 +6,13 @@
     :rules="rules"
     @reset="handleReset"
     @search="handleSearch"
+    @keyup.enter="handleSearch"
   >
   </ArtSearchBar>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted } from 'vue'
+  import { ref, computed } from 'vue'
   
   interface Props {
     modelValue: Record<string, any>
@@ -129,27 +130,15 @@
     
     // 过滤空参数
     const filteredParams = Object.fromEntries(
-      Object.entries(searchParams).filter(([_, value]) => value !== undefined && value !== null && value !== '')
+      Object.entries(searchParams).filter(([_, value]) => {
+        // 过滤掉 undefined、null、空字符串
+        return value !== undefined && value !== null && value !== ''
+      })
     )
     
+    console.log('原始参数:', searchParams)
+    console.log('过滤后参数:', filteredParams)
+    
     emit('search', filteredParams)
-    console.log('表单数据', filteredParams)
   }
-
-  // 添加按回车键查询的功能
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      handleSearch()
-    }
-  }
-
-  // 监听回车键
-  onMounted(() => {
-    document.addEventListener('keydown', handleKeydown)
-  })
-
-  // 组件卸载时移除事件监听
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown)
-  })
 </script>

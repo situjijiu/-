@@ -227,7 +227,13 @@
    * @param params 参数
    */
   const handleSearch = (params: Record<string, any>) => {
-    console.log(params)
+    console.log('搜索参数:', params)
+    // 清空搜索参数（保留分页参数）
+    Object.keys(searchParams).forEach(key => {
+      if (key !== 'current' && key !== 'size') {
+        delete searchParams[key]
+      }
+    })
     // 搜索参数赋值
     Object.assign(searchParams, params)
     getData()

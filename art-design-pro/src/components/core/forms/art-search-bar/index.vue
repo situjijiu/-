@@ -8,6 +8,7 @@
       :model="modelValue"
       :label-position="labelPosition"
       v-bind="{ ...$attrs }"
+      @keyup.enter="handleSearch"
     >
       <ElRow :gutter="gutter">
         <ElCol
