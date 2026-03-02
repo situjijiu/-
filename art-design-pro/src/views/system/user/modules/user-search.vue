@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
+  
   interface Props {
     modelValue: Record<string, any>
   }
@@ -34,66 +36,72 @@
     // userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }]
   }
 
-  // 动态 options
-  const statusOptions = ref<{ label: string; value: string; disabled?: boolean }[]>([])
+  // 角色选项
+  const roleOptions = ref<{ label: string; value: string; disabled?: boolean }[]>([
+    { label: '超级管理员', value: 'SUPER_ADMIN' },
+    { label: '管理员', value: 'ADMIN' },
+    { label: '普通用户', value: 'USER' }
+  ])
 
-  // 模拟接口返回状态数据
-  function fetchStatusOptions(): Promise<typeof statusOptions.value> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { label: '在线', value: '1' },
-          { label: '离线', value: '2' },
-          { label: '异常', value: '3' },
-          { label: '注销', value: '4' }
-        ])
-      }, 1000)
-    })
-  }
-
-  onMounted(async () => {
-    statusOptions.value = await fetchStatusOptions()
-  })
+  // 积分状态选项
+  const pointOptions = ref<{ label: string; value: string; disabled?: boolean }[]>([
+    { label: '正常用户', value: 'normal' },
+    { label: '异常用户', value: 'abnormal' }
+  ])
 
   // 表单配置
   const formItems = computed(() => [
     {
       label: '用户名',
-      key: 'userName',
+      key: 'username',
       type: 'input',
       placeholder: '请输入用户名',
       clearable: true
     },
     {
       label: '手机号',
-      key: 'userPhone',
+      key: 'phone',
       type: 'input',
       props: { placeholder: '请输入手机号', maxlength: '11' }
     },
     {
       label: '邮箱',
-      key: 'userEmail',
+      key: 'email',
       type: 'input',
       props: { placeholder: '请输入邮箱' }
     },
     {
-      label: '状态',
-      key: 'status',
+      label: '性别',
+      key: 'sex',
       type: 'select',
       props: {
-        placeholder: '请选择状态',
-        options: statusOptions.value
+        placeholder: '请选择性别',
+        options: [
+          { label: '男', value: '1' },
+          { label: '女', value: '0' },
+          { label: '保密', value: '2' }
+        ],
+        clearable: true
       }
     },
     {
-      label: '性别',
-      key: 'userGender',
-      type: 'radiogroup',
+      label: '角色',
+      key: 'role',
+      type: 'select',
       props: {
-        options: [
-          { label: '男', value: '1' },
-          { label: '女', value: '2' }
-        ]
+        placeholder: '请选择角色',
+        options: roleOptions.value,
+        clearable: true
+      }
+    },
+    {
+      label: '积分状态',
+      key: 'pointStatus',
+      type: 'select',
+      props: {
+        placeholder: '请选择积分状态',
+        options: pointOptions.value,
+        clearable: true
       }
     }
   ])
@@ -106,7 +114,42 @@
 
   async function handleSearch() {
     await searchBarRef.value.validate()
-    emit('search', formData.value)
-    console.log('表单数据', formData.value)
+    
+    // 处理积分状态转换
+    const searchParams = { ...formData.value }
+    if (searchParams.pointStatus) {
+      // 积分小于60为异常用户，大于等于60为正常用户
+      if (searchParams.pointStatus === 'abnormal') {
+        searchParams.point = 59 // 小于60
+      } else if (searchParams.pointStatus === 'normal') {
+        searchParams.point = 60 // 大于等于60
+      }
+      delete searchParams.pointStatus
+    }
+    
+    // 过滤空参数
+    const filteredParams = Object.fromEntries(
+      Object.entries(searchParams).filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    )
+    
+    emit('search', filteredParams)
+    console.log('表单数据', filteredParams)
   }
+
+  // 添加按回车键查询的功能
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  // 监听回车键
+  onMounted(() => {
+    document.addEventListener('keydown', handleKeydown)
+  })
+
+  // 组件卸载时移除事件监听
+  onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown)
+  })
 </script>

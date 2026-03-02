@@ -65,11 +65,12 @@
 
   // 搜索表单
   const searchForm = ref({
-    userName: undefined,
-    userGender: undefined,
-    userPhone: undefined,
-    userEmail: undefined,
-    status: '1'
+    username: undefined,
+    sex: undefined,
+    phone: undefined,
+    email: undefined,
+    role: undefined,
+    point: undefined
   })
 
   // 用户状态配置
@@ -111,7 +112,7 @@
       apiParams: {
         current: 1,
         size: 20,
-        // ...searchForm.value
+        ...searchForm.value
       },
       // 自定义分页字段映射，未设置时将使用全局配置 tableConfig.ts 中的 paginationKey
       // paginationKey: {
