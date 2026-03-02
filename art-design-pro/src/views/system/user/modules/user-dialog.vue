@@ -42,7 +42,7 @@
         </ElCol>
         <ElCol :span="12">
           <ElFormItem label="角色" prop="role">
-            <ElSelect v-model="formData.role">
+            <ElSelect v-model="formData.role" :disabled="dialogType === 'edit'">
               <ElOption label="超级管理员" value="SUPER_ADMIN" />
               <ElOption label="管理员" value="ADMIN" />
               <ElOption label="普通用户" value="USER" />
