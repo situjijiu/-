@@ -46,6 +46,7 @@
   import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetUserList } from '@/api/system-manage'
+  import { fetchUpdateUser } from '@/api/user'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
   import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
@@ -318,8 +319,8 @@
   const handleDialogSubmit = async (formData: any) => {
     try {
       console.log('提交的表单数据:', formData)
-      // 这里可以添加调用后端API更新用户信息的逻辑
-      // 例如：await fetchUpdateUser(formData)
+      // 调用更新用户信息接口
+      await fetchUpdateUser(formData)
       
       // 更新成功后刷新数据
       await refreshData()

@@ -37,3 +37,15 @@ export function fetchChangePassword(params: Api.User.ChangePasswordParams) {
     data: params
   })
 }
+
+/**
+ * 更新用户信息
+ * @param params 更新用户信息参数
+ * @returns 更新用户信息响应
+ */
+export function fetchUpdateUser(params: Api.User.UpdateUserInfoParams) {
+  return request.put<Api.User.UpdateUserInfoResponse>({ 
+    url: "/api/user/update",
+    data: params
+  })
+}

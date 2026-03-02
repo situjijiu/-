@@ -154,6 +154,7 @@ declare namespace Api {
       phone?: string
       address?: string
       sex?: string
+      point?: number
       signature?: string
     }
 
