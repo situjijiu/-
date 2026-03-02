@@ -152,10 +152,13 @@
             return sexMap[row.sex] || '未知'
           }
         },
-        { prop: 'phone', label: '手机号' },
+        {
+          prop: 'phone',
+          label: '手机号'
+        },
         {
           prop: 'role',
-          label: '状态',
+          label: '角色',
           formatter: (row) => {
             const roleMap = {
               'SUPER_ADMIN': { type: 'success', text: '超级管理员' },
@@ -164,6 +167,15 @@
             }
             const roleConfig = roleMap[row.role] || { type: 'info', text: '未知' }
             return h(ElTag, { type: roleConfig.type }, () => roleConfig.text)
+          }
+        },
+        {
+          prop: 'point',
+          label: '状态',
+          formatter: (row) => {
+            const point = row.point || 0
+            const isNormal = point >= 60
+            return h(ElTag, { type: isNormal ? 'success' : 'danger' }, () => isNormal ? '正常用户' : '异常用户')
           }
         },
         {
