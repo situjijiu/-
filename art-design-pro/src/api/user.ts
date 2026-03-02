@@ -56,8 +56,8 @@ export function fetchUpdateUser(params: Api.User.UpdateUserInfoParams) {
  * @returns 删除用户响应
  */
 export function fetchDeleteUser(params: { userId: number }) {
-  return request.delete<Api.User.DeleteUserResponse>({ 
-    url: "/user/delete",
+  return request.del<Api.User.DeleteUserResponse>({ 
+    url: "/api/user/delete",
     params
   })
 }
