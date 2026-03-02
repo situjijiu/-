@@ -36,7 +36,7 @@
 export const tableConfig = {
   // 响应数据字段映射配置，系统会从接口返回数据中按顺序查找这些字段
   // 列表数据
-  recordFields: ['list', 'data', 'records', 'items', 'result', 'rows'],
+  recordFields: ['data', 'list', 'records', 'items', 'result', 'rows'],
   // 总条数
   totalFields: ['total', 'count'],
   // 当前页码

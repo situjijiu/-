@@ -92,18 +92,18 @@
     )
   }
 
-  const {
-    columns,
-    columnChecks,
-    data,
-    loading,
-    pagination,
-    getData,
-    searchParams,
-    resetSearchParams,
-    handleSizeChange,
-    handleCurrentChange,
-    refreshData
+  const { 
+    columns, 
+    columnChecks, 
+    data, 
+    loading, 
+    pagination, 
+    getData, 
+    searchParams, 
+    resetSearchParams, 
+    handleSizeChange, 
+    handleCurrentChange, 
+    refreshData 
   } = useTable({
     // 核心配置
     core: {
@@ -122,7 +122,7 @@
         { type: 'selection' }, // 勾选列
         { type: 'index', width: 60, label: '序号' }, // 序号
         {
-          prop: 'userInfo',
+          prop: 'username',
           label: '用户名',
           width: 280,
           // visible: false, // 默认是否显示列
@@ -136,29 +136,37 @@
                 previewTeleported: true
               }),
               h('div', { class: 'ml-2' }, [
-                h('p', { class: 'user-name' }, row.userName),
-                h('p', { class: 'email' }, row.userEmail)
+                h('p', { class: 'user-name' }, row.username),
+                h('p', { class: 'email' }, row.email)
               ])
             ])
           }
         },
         {
-          prop: 'userGender',
+          prop: 'sex',
           label: '性别',
           sortable: true,
-          formatter: (row) => row.userGender
+          formatter: (row) => {
+            const sexMap = { '0': '女', '1': '男', '2': '保密' }
+            return sexMap[row.sex] || '未知'
+          }
         },
-        { prop: 'userPhone', label: '手机号' },
+        { prop: 'phone', label: '手机号' },
         {
-          prop: 'status',
+          prop: 'role',
           label: '状态',
           formatter: (row) => {
-            const statusConfig = getUserStatusConfig(row.status)
-            return h(ElTag, { type: statusConfig.type }, () => statusConfig.text)
+            const roleMap = {
+              'SUPER_ADMIN': { type: 'success', text: '超级管理员' },
+              'ADMIN': { type: 'warning', text: '管理员' },
+              'USER': { type: 'info', text: '普通用户' }
+            }
+            const roleConfig = roleMap[row.role] || { type: 'info', text: '未知' }
+            return h(ElTag, { type: roleConfig.type }, () => roleConfig.text)
           }
         },
         {
-          prop: 'createTime',
+          prop: 'createdAt',
           label: '创建日期',
           sortable: true
         },
