@@ -48,12 +48,18 @@
   import { fetchGetUserList } from '@/api/system-manage'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
-  import { ElTag, ElMessageBox, ElImage } from 'element-plus'
+  import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
   import { DialogType } from '@/types'
+  import { useUserStore } from '@/store/modules/user'
+  import { computed, nextTick, ref } from 'vue'
 
   defineOptions({ name: 'User' })
 
   type UserListItem = Api.SystemManage.UserListItem
+
+  // 用户状态管理
+  const userStore = useUserStore()
+  const userInfo = computed(() => userStore.getUserInfo)
 
   // 弹窗相关
   const dialogType = ref<DialogType>('add')
@@ -256,6 +262,18 @@
    */
   const showDialog = (type: DialogType, row?: UserListItem): void => {
     console.log('打开弹窗:', { type, row })
+    
+    // 检查权限：管理员不能修改超级管理员的信息
+    if (type === 'edit' && row) {
+      const currentUserRole = userInfo.value.role
+      const targetUserRole = row.role
+      
+      if (currentUserRole === 'ADMIN' && targetUserRole === 'SUPER_ADMIN') {
+        ElMessage.warning('管理员不能修改超级管理员的信息')
+        return
+      }
+    }
+    
     dialogType.value = type
     currentUserData.value = row || {}
     nextTick(() => {
@@ -268,6 +286,23 @@
    */
   const deleteUser = (row: UserListItem): void => {
     console.log('删除用户:', row)
+    
+    // 检查权限：不能删除管理员
+    const currentUserRole = userInfo.value.role
+    const targetUserRole = row.role
+    
+    // 只有超级管理员可以删除管理员
+    if (targetUserRole === 'ADMIN' && currentUserRole !== 'SUPER_ADMIN') {
+      ElMessage.warning('只有超级管理员可以删除管理员')
+      return
+    }
+    
+    // 不能删除超级管理员
+    if (targetUserRole === 'SUPER_ADMIN') {
+      ElMessage.warning('不能删除超级管理员')
+      return
+    }
+    
     ElMessageBox.confirm(`确定要注销该用户吗？`, '注销用户', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
