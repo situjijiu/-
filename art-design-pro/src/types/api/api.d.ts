@@ -84,23 +84,23 @@ declare namespace Api {
     /** 用户列表项 */
     interface UserListItem {
       id: number
+      username: string
+      email: string
+      phone: string
+      realName: string
+      sex: string
+      address: string
       avatar: string
-      status: string
-      userName: string
-      userGender: string
-      nickName: string
-      userPhone: string
-      userEmail: string
-      userRoles: string[]
-      createBy: string
-      createTime: string
-      updateBy: string
-      updateTime: string
+      signature: string
+      role: string
+      point: number
+      createdAt: string
+      updatedAt: string
     }
 
     /** 用户搜索参数 */
     type UserSearchParams = Partial<
-      Pick<UserListItem, 'id' | 'userName' | 'userGender' | 'userPhone' | 'userEmail' | 'status'> &
+      Pick<UserListItem, 'id' | 'username' | 'sex' | 'phone' | 'email'> &
         Api.Common.CommonSearchParams
     >
 
