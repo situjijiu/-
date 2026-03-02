@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-
+  import { ROLE_LIST_DATA } from '@/mock/temp/formData'
   import type { FormInstance, FormRules } from 'element-plus'
 
   interface Props {
@@ -106,7 +106,8 @@
   const props = defineProps<Props>()
   const emit = defineEmits<Emits>()
 
-
+  // 角色列表数据
+  const roleList = ref(ROLE_LIST_DATA)
 
   // 对话框显示控制
   const dialogVisible = computed({
