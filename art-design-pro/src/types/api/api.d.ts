@@ -178,5 +178,12 @@ declare namespace Api {
       msg: string
       data?: any
     }
+
+    /** 删除用户响应 */
+    interface DeleteUserResponse {
+      code: number
+      msg: string
+      data?: any
+    }
   }
 }

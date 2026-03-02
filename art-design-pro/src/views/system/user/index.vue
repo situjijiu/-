@@ -46,7 +46,7 @@
   import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetUserList } from '@/api/system-manage'
-  import { fetchUpdateUser } from '@/api/user'
+  import { fetchUpdateUser, fetchDeleteUser } from '@/api/user'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
   import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
@@ -285,7 +285,7 @@
   /**
    * 删除用户
    */
-  const deleteUser = (row: UserListItem): void => {
+  const deleteUser = async (row: UserListItem): void => {
     console.log('删除用户:', row)
     
     // 检查权限：不能删除管理员
@@ -304,13 +304,25 @@
       return
     }
     
-    ElMessageBox.confirm(`确定要注销该用户吗？`, '注销用户', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'error'
-    }).then(() => {
-      ElMessage.success('注销成功')
-    })
+    try {
+      await ElMessageBox.confirm(`确定要删除该用户吗？`, '删除用户', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'error'
+      })
+      
+      // 调用删除用户接口
+      await fetchDeleteUser({ id: row.id })
+      
+      ElMessage.success('删除成功')
+      // 删除成功后刷新数据
+      await refreshData()
+    } catch (error) {
+      if (error !== 'cancel') {
+        console.error('删除失败:', error)
+        ElMessage.error('删除失败，请稍后重试')
+      }
+    }
   }
 
   /**
