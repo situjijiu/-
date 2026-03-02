@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ROLE_LIST_DATA } from '@/mock/temp/formData'
+
   import type { FormInstance, FormRules } from 'element-plus'
 
   interface Props {
@@ -106,8 +106,7 @@
   const props = defineProps<Props>()
   const emit = defineEmits<Emits>()
 
-  // 角色列表数据
-  const roleList = ref(ROLE_LIST_DATA)
+
 
   // 对话框显示控制
   const dialogVisible = computed({
@@ -157,7 +156,7 @@
     role: [{ required: true, message: '请选择角色', trigger: 'blur' }],
     address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
     point: [{ required: true, message: '请输入积分', trigger: 'blur' }],
-    password: [{ required: dialogType === 'add', message: '请输入密码', trigger: 'blur' }]
+    password: [{ required: dialogType.value === 'add', message: '请输入密码', trigger: 'blur' }]
   }
 
   /**

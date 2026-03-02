@@ -43,7 +43,6 @@
 
 <script setup lang="ts">
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
-  import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetUserList } from '@/api/system-manage'
   import { fetchUpdateUser, fetchDeleteUser, fetchAddUser } from '@/api/user'
@@ -52,6 +51,7 @@
   import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
   import { DialogType } from '@/types'
   import { useUserStore } from '@/store/modules/user'
+  import { getAvatarUrl } from '@/utils/avatar'
   import { computed, nextTick, ref } from 'vue'
 
   defineOptions({ name: 'User' })
@@ -80,25 +80,7 @@
     point: undefined
   })
 
-  // 用户状态配置
-  const USER_STATUS_CONFIG = {
-    '1': { type: 'success' as const, text: '在线' },
-    '2': { type: 'info' as const, text: '离线' },
-    '3': { type: 'warning' as const, text: '异常' },
-    '4': { type: 'danger' as const, text: '注销' }
-  } as const
 
-  /**
-   * 获取用户状态配置
-   */
-  const getUserStatusConfig = (status: string) => {
-    return (
-      USER_STATUS_CONFIG[status as keyof typeof USER_STATUS_CONFIG] || {
-        type: 'info' as const,
-        text: '未知'
-      }
-    )
-  }
 
   const { 
     columns, 
@@ -155,7 +137,7 @@
           label: '性别',
           sortable: true,
           formatter: (row) => {
-            const sexMap = { '0': '女', '1': '男', '2': '保密' }
+            const sexMap: Record<string, string> = { '0': '女', '1': '男', '2': '保密' }
             return sexMap[row.sex] || '未知'
           }
         },
@@ -167,7 +149,7 @@
           prop: 'role',
           label: '角色',
           formatter: (row) => {
-            const roleMap = {
+            const roleMap: Record<string, { type: 'info' | 'success' | 'warning' | 'danger' | 'primary'; text: string }> = {
               'SUPER_ADMIN': { type: 'success', text: '超级管理员' },
               'ADMIN': { type: 'warning', text: '管理员' },
               'USER': { type: 'info', text: '普通用户' }
@@ -230,11 +212,11 @@
           return []
         }
 
-        // 使用本地头像替换接口返回的头像
-        return records.map((item, index: number) => {
+        // 使用Gravatar生成头像
+        return records.map((item) => {
           return {
             ...item,
-            avatar: ACCOUNT_TABLE_DATA[index % ACCOUNT_TABLE_DATA.length].avatar
+            avatar: getAvatarUrl(item)
           }
         })
       }
@@ -250,7 +232,7 @@
     // 清空搜索参数（保留分页参数）
     Object.keys(searchParams).forEach(key => {
       if (key !== 'current' && key !== 'size') {
-        delete searchParams[key]
+        delete (searchParams as any)[key]
       }
     })
     // 搜索参数赋值
@@ -285,7 +267,7 @@
   /**
    * 删除用户
    */
-  const deleteUser = async (row: UserListItem): void => {
+  const deleteUser = async (row: UserListItem): Promise<void> => {
     console.log('删除用户:', row)
     
     // 检查权限：不能删除管理员
