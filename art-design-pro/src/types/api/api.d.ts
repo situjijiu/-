@@ -185,5 +185,26 @@ declare namespace Api {
       msg: string
       data?: any
     }
+
+    /** 新增用户参数 */
+    interface AddUserParams {
+      username: string
+      realName: string
+      phone: string
+      email: string
+      sex: string
+      role: string
+      address: string
+      signature: string
+      point: number
+      password: string
+    }
+
+    /** 新增用户响应 */
+    interface AddUserResponse {
+      code: number
+      msg: string
+      data?: any
+    }
   }
 }

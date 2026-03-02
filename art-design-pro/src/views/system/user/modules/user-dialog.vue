@@ -71,6 +71,13 @@
           </ElFormItem>
         </ElCol>
       </ElRow>
+      <ElRow v-if="dialogType === 'add'" :gutter="20">
+        <ElCol :span="12">
+          <ElFormItem label="密码" prop="password">
+            <ElInput v-model="formData.password" type="password" placeholder="请输入密码" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
     </ElForm>
     <template #footer>
       <div class="dialog-footer">
@@ -115,7 +122,7 @@
 
   // 表单数据
   const formData = reactive({
-    id: '',
+    userId: '',
     username: '',
     realName: '',
     phone: '',
@@ -124,7 +131,8 @@
     role: 'USER',
     address: '',
     signature: '',
-    point: 0
+    point: 100,
+    password: ''
   })
 
   // 表单验证规则
@@ -148,7 +156,8 @@
     sex: [{ required: true, message: '请选择性别', trigger: 'blur' }],
     role: [{ required: true, message: '请选择角色', trigger: 'blur' }],
     address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-    point: [{ required: true, message: '请输入积分', trigger: 'blur' }]
+    point: [{ required: true, message: '请输入积分', trigger: 'blur' }],
+    password: [{ required: dialogType === 'add', message: '请输入密码', trigger: 'blur' }]
   }
 
   /**
@@ -160,7 +169,7 @@
     const row = props.userData
 
     Object.assign(formData, {
-      id: isEdit && row ? row.id || '' : '',
+      userId: isEdit && row ? row.id || '' : '',
       username: isEdit && row ? row.username || '' : '',
       realName: isEdit && row ? row.realName || '' : '',
       phone: isEdit && row ? row.phone || '' : '',
@@ -169,7 +178,8 @@
       role: isEdit && row ? row.role || 'USER' : 'USER',
       address: isEdit && row ? row.address || '' : '',
       signature: isEdit && row ? row.signature || '' : '',
-      point: isEdit && row ? row.point || 0 : 0
+      point: isEdit && row ? row.point || 0 : 0,
+      password: ''
     })
   }
 

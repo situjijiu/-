@@ -46,7 +46,7 @@
   import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetUserList } from '@/api/system-manage'
-  import { fetchUpdateUser, fetchDeleteUser } from '@/api/user'
+  import { fetchUpdateUser, fetchDeleteUser, fetchAddUser } from '@/api/user'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
   import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
@@ -312,7 +312,7 @@
       })
       
       // 调用删除用户接口
-      await fetchDeleteUser({ id: row.id })
+      await fetchDeleteUser({ userId: row.id })
       
       ElMessage.success('删除成功')
       // 删除成功后刷新数据
@@ -331,8 +331,17 @@
   const handleDialogSubmit = async (formData: any) => {
     try {
       console.log('提交的表单数据:', formData)
-      // 调用更新用户信息接口
-      await fetchUpdateUser(formData)
+      
+      // 根据对话框类型调用不同的API
+      if (dialogType.value === 'add') {
+        // 调用新增用户接口
+        await fetchAddUser(formData)
+        ElMessage.success('新增用户成功')
+      } else {
+        // 调用更新用户信息接口
+        await fetchUpdateUser(formData)
+        ElMessage.success('更新用户信息成功')
+      }
       
       // 更新成功后刷新数据
       await refreshData()
