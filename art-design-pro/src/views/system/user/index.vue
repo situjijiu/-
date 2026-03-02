@@ -280,12 +280,20 @@
   /**
    * 处理弹窗提交事件
    */
-  const handleDialogSubmit = async () => {
+  const handleDialogSubmit = async (formData: any) => {
     try {
+      console.log('提交的表单数据:', formData)
+      // 这里可以添加调用后端API更新用户信息的逻辑
+      // 例如：await fetchUpdateUser(formData)
+      
+      // 更新成功后刷新数据
+      await refreshData()
+      
       dialogVisible.value = false
       currentUserData.value = {}
     } catch (error) {
       console.error('提交失败:', error)
+      ElMessage.error('提交失败，请稍后重试')
     }
   }
 
