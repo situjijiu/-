@@ -7,7 +7,7 @@
           <img class="absolute top-0 left-0 w-full h-50 object-cover" src="@imgs/user/bg.webp" />
           <img
             class="relative z-10 w-20 h-20 mt-30 mx-auto object-cover border-2 border-white rounded-full"
-            src="@imgs/user/avatar.webp"
+            :src="avatarUrl"
           />
           <h2 class="mt-5 text-xl font-normal">{{ userInfo.username }}</h2>
           <p class="mt-5 text-sm">专注于图书管理与推荐系统</p>
@@ -151,11 +151,19 @@
   import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage } from 'element-plus'
 import { fetchGetUserInfo, fetchUpdateUserInfo, fetchChangePassword } from '@/api/user'
+  import multiavatar from '@multiavatar/multiavatar/esm'
 
   defineOptions({ name: 'UserCenter' })
 
   const userStore = useUserStore()
   const userInfo = computed(() => userStore.getUserInfo)
+
+  // 使用multiavatar根据用户名生成头像
+  const avatarUrl = computed(() => {
+    if (!userInfo.value.username) return '@imgs/user/avatar.webp'
+    const svgCode = multiavatar(userInfo.value.username)
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+  })
 
   const isEdit = ref(false)
   const isEditPwd = ref(false)

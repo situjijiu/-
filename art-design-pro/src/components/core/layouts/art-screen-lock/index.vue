@@ -21,8 +21,8 @@
     <div v-if="!isLock">
       <ElDialog v-model="visible" :width="370" :show-close="false" @open="handleDialogOpen">
         <div class="flex-c flex-col">
-          <img class="w-16 h-16 rounded-full" src="@imgs/user/avatar.webp" alt="用户头像" />
-          <div class="mt-7.5 mb-3.5 text-base font-medium">{{ userInfo.userName }}</div>
+          <img class="w-16 h-16 rounded-full" :src="avatarUrl" alt="用户头像" />
+          <div class="mt-7.5 mb-3.5 text-base font-medium">{{ userInfo.username }}</div>
           <ElForm
             ref="formRef"
             :model="formData"
@@ -59,9 +59,9 @@
     <!-- 解锁界面 -->
     <div v-else class="unlock-content">
       <div class="flex-c flex-col w-80">
-        <img class="w-16 h-16 mt-5 rounded-full" src="@imgs/user/avatar.webp" alt="用户头像" />
+        <img class="w-16 h-16 mt-5 rounded-full" :src="avatarUrl" alt="用户头像" />
         <div class="mt-3 mb-3.5 text-base font-medium">
-          {{ userInfo.userName }}
+          {{ userInfo.username }}
         </div>
         <ElForm
           ref="unlockFormRef"
@@ -113,6 +113,8 @@
   import CryptoJS from 'crypto-js'
   import { useUserStore } from '@/store/modules/user'
   import { mittBus } from '@/utils/sys'
+  import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+  import multiavatar from '@multiavatar/multiavatar/esm'
 
   // 国际化
   const { t } = useI18n()
@@ -123,6 +125,13 @@
   // Store
   const userStore = useUserStore()
   const { info: userInfo, lockPassword, isLock } = storeToRefs(userStore)
+
+  // 使用multiavatar根据用户名生成头像
+  const avatarUrl = computed(() => {
+    if (!userInfo.value.username) return '@imgs/user/avatar.webp'
+    const svgCode = multiavatar(userInfo.value.username)
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+  })
 
   // 响应式数据
   const visible = ref<boolean>(false)

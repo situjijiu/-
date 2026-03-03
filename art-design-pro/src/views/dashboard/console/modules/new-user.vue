@@ -21,10 +21,10 @@
       :header-cell-style="{ background: 'transparent' }"
     >
       <template #default>
-        <ElTableColumn label="头像" prop="avatar" width="150px">
+        <ElTableColumn label="头像" width="150px">
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <img class="size-9 rounded-lg" :src="scope.row.avatar" alt="avatar" />
+              <img class="size-9 rounded-lg" :src="getAvatarUrl(scope.row.username)" alt="avatar" />
               <span class="ml-2">{{ scope.row.username }}</span>
             </div>
           </template>
@@ -53,12 +53,7 @@
 </template>
 
 <script setup lang="ts">
-  import avatar1 from '@/assets/images/avatar/avatar1.webp'
-  import avatar2 from '@/assets/images/avatar/avatar2.webp'
-  import avatar3 from '@/assets/images/avatar/avatar3.webp'
-  import avatar4 from '@/assets/images/avatar/avatar4.webp'
-  import avatar5 from '@/assets/images/avatar/avatar5.webp'
-  import avatar6 from '@/assets/images/avatar/avatar6.webp'
+  import multiavatar from '@multiavatar/multiavatar/esm'
 
   interface UserTableItem {
     username: string
@@ -68,12 +63,19 @@
     percentage: number
     pro: number
     color: string
-    avatar: string
   }
 
   const ANIMATION_DELAY = 100
 
   const radio2 = ref('本月')
+
+  /**
+   * 根据用户名生成头像
+   */
+  const getAvatarUrl = (username: string) => {
+    const svgCode = multiavatar(username)
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+  }
 
   /**
    * 新用户表格数据
@@ -87,8 +89,7 @@
       age: 22,
       percentage: 60,
       pro: 0,
-      color: 'var(--art-primary)',
-      avatar: avatar1
+      color: 'var(--art-primary)'
     },
     {
       username: '何小荷',
@@ -97,8 +98,7 @@
       age: 21,
       percentage: 20,
       pro: 0,
-      color: 'var(--art-secondary)',
-      avatar: avatar2
+      color: 'var(--art-secondary)'
     },
     {
       username: '誶誶淰',
@@ -107,8 +107,7 @@
       age: 23,
       percentage: 60,
       pro: 0,
-      color: 'var(--art-warning)',
-      avatar: avatar3
+      color: 'var(--art-warning)'
     },
     {
       username: '发呆草',
@@ -117,8 +116,7 @@
       age: 28,
       percentage: 50,
       pro: 0,
-      color: 'var(--art-info)',
-      avatar: avatar4
+      color: 'var(--art-info)'
     },
     {
       username: '甜筒',
@@ -127,8 +125,7 @@
       age: 26,
       percentage: 70,
       pro: 0,
-      color: 'var(--art-error)',
-      avatar: avatar5
+      color: 'var(--art-error)'
     },
     {
       username: '冷月呆呆',
@@ -137,8 +134,7 @@
       age: 25,
       percentage: 90,
       pro: 0,
-      color: 'var(--art-success)',
-      avatar: avatar6
+      color: 'var(--art-success)'
     }
   ])
 

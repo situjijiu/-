@@ -53,6 +53,7 @@
   import { DialogType } from '@/types'
   import { useUserStore } from '@/store/modules/user'
   import { computed, nextTick, ref } from 'vue'
+  import multiavatar from '@multiavatar/multiavatar'
 
   defineOptions({ name: 'User' })
 
@@ -135,11 +136,16 @@
           width: 280,
           // visible: false, // 默认是否显示列
           formatter: (row) => {
+            // 使用multiavatar根据用户名生成SVG头像
+            const svgCode = multiavatar(row.username)
+            // 将SVG代码转换为data URL
+            const avatarUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+            
             return h('div', { class: 'user flex-c' }, [
               h(ElImage, {
                 class: 'size-9.5 rounded-md',
-                src: row.avatar,
-                previewSrcList: [row.avatar],
+                src: avatarUrl,
+                previewSrcList: [avatarUrl],
                 // 图片预览是否插入至 body 元素上，用于解决表格内部图片预览样式异常
                 previewTeleported: true
               }),
@@ -222,7 +228,7 @@
     },
     // 数据处理
     transform: {
-      // 数据转换器 - 替换头像
+      // 数据转换器
       dataTransformer: (records) => {
         // 类型守卫检查
         if (!Array.isArray(records)) {
@@ -230,13 +236,7 @@
           return []
         }
 
-        // 使用本地头像替换接口返回的头像
-        return records.map((item, index: number) => {
-          return {
-            ...item,
-            avatar: ACCOUNT_TABLE_DATA[index % ACCOUNT_TABLE_DATA.length].avatar
-          }
-        })
+        return records
       }
     }
   })

@@ -14,7 +14,7 @@
     <template #reference>
       <img
         class="size-8.5 mr-5 c-p rounded-full max-sm:w-6.5 max-sm:h-6.5 max-sm:mr-[16px]"
-        src="@imgs/user/avatar.webp"
+        :src="avatarUrl"
         alt="avatar"
       />
     </template>
@@ -23,11 +23,11 @@
         <div class="flex-c pb-1 px-0">
           <img
             class="w-10 h-10 mr-3 ml-0 overflow-hidden rounded-full float-left"
-            src="@imgs/user/avatar.webp"
+            :src="avatarUrl"
           />
           <div class="w-[calc(100%-60px)] h-full">
             <span class="block text-sm font-medium text-g-800 truncate">{{
-              userInfo.userName
+              userInfo.username
             }}</span>
             <span class="block mt-0.5 text-xs text-g-500 truncate">{{ userInfo.email }}</span>
           </div>
@@ -66,6 +66,8 @@
   import { useUserStore } from '@/store/modules/user'
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
+  import { computed, ref } from 'vue'
+  import multiavatar from '@multiavatar/multiavatar/esm'
 
   defineOptions({ name: 'ArtUserMenu' })
 
@@ -75,6 +77,13 @@
 
   const { getUserInfo: userInfo } = storeToRefs(userStore)
   const userMenuPopover = ref()
+
+  // 使用multiavatar根据用户名生成头像
+  const avatarUrl = computed(() => {
+    if (!userInfo.value.username) return '@imgs/user/avatar.webp'
+    const svgCode = multiavatar(userInfo.value.username)
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+  })
 
   /**
    * 页面跳转
