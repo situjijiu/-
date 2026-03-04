@@ -51,7 +51,7 @@
               <p><strong>ISBN：</strong>{{ selectedBook?.isbn }}</p>
               <p><strong>出版社：</strong>{{ selectedBook?.publisher }}</p>
               <p><strong>出版日期：</strong>{{ selectedBook?.publishDate }}</p>
-              <p><strong>价格：</strong>{{ selectedBook?.price }} 元</p>
+              <p><strong>价格：</strong>{{ selectedBook?.price.toFixed(2) }} 元</p>
             </div>
           </div>
           <div class="detail-content">
@@ -152,7 +152,10 @@ const {
       {
         prop: 'price',
         label: '价格',
-        width: 100
+        width: 100,
+        formatter: (row: BookListItem) => {
+          return row.price.toFixed(2)
+        }
       },
       {
         prop: 'operation',
