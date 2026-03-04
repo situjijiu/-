@@ -41,13 +41,13 @@ export class MenuProcessor {
    */
   private async processFrontendMenu(): Promise<AppRouteRecord[]> {
     const userStore = useUserStore()
-    const roles = userStore.info?.roles
+    const userRole = userStore.info?.role
 
     let menuList = [...asyncRoutes]
 
     // 根据角色过滤菜单
-    if (roles && roles.length > 0) {
-      menuList = this.filterMenuByRoles(menuList, roles)
+    if (userRole) {
+      menuList = this.filterMenuByRole(menuList, userRole)
     }
 
     return this.filterEmptyMenus(menuList)
@@ -73,6 +73,43 @@ export class MenuProcessor {
         const filteredItem = { ...item }
         if (filteredItem.children?.length) {
           filteredItem.children = this.filterMenuByRoles(filteredItem.children, roles)
+        }
+        acc.push(filteredItem)
+      }
+
+      return acc
+    }, [])
+  }
+
+  /**
+   * 根据用户角色字符过滤菜单
+   */
+  private filterMenuByRole(menu: AppRouteRecord[], userRole: string): AppRouteRecord[] {
+    return menu.reduce((acc: AppRouteRecord[], item) => {
+      // 检查当前菜单项是否需要权限
+      const itemRoles = item.meta?.roles
+      
+      // 确定用户是否有权限
+      let hasPermission = true
+      if (itemRoles && itemRoles.length > 0) {
+        // 普通用户（USER）只能访问无角色限制的菜单
+        if (userRole === 'USER') {
+          hasPermission = false
+        } 
+        // 管理员（ADMIN）和超级管理员（SUPER_ADMIN）可以访问标记为 R_ADMIN 或 R_SUPER 的菜单
+        else if (userRole === 'ADMIN') {
+          hasPermission = itemRoles.includes('R_ADMIN') || itemRoles.includes('R_SUPER')
+        } 
+        // 超级管理员（SUPER_ADMIN）可以访问所有菜单
+        else if (userRole === 'SUPER_ADMIN') {
+          hasPermission = true
+        }
+      }
+
+      if (hasPermission) {
+        const filteredItem = { ...item }
+        if (filteredItem.children?.length) {
+          filteredItem.children = this.filterMenuByRole(filteredItem.children, userRole)
         }
         acc.push(filteredItem)
       }
