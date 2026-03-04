@@ -207,4 +207,73 @@ declare namespace Api {
       data?: any
     }
   }
+
+  /** 图书管理类型 */
+  namespace Book {
+    /** 图书列表项 */
+    interface BookListItem {
+      id: number
+      title: string
+      author: string
+      isbn: string
+      publisher: string
+      publishDate: string
+      price: number
+      cover: string
+      description: string
+      createdAt: string
+      updatedAt: string
+    }
+
+    /** 图书搜索参数 */
+    type BookSearchParams = Partial<
+      Pick<BookListItem, 'title' | 'author' | 'isbn' | 'publisher'> &
+        Api.Common.CommonSearchParams
+    >
+
+    /** 新增图书参数 */
+    interface AddBookParams {
+      title: string
+      author: string
+      isbn: string
+      publisher: string
+      publishDate: string
+      price: number
+      cover: string
+      description: string
+    }
+
+    /** 编辑图书参数 */
+    interface UpdateBookParams {
+      id: number
+      title: string
+      author: string
+      isbn: string
+      publisher: string
+      publishDate: string
+      price: number
+      cover: string
+      description: string
+    }
+
+    /** 删除图书参数 */
+    interface DeleteBookParams {
+      id: number | number[]
+    }
+
+    /** 图书响应 */
+    interface BookResponse {
+      code: number
+      msg: string
+      data?: any
+    }
+
+    /** 图书列表响应 */
+    interface BookListResponse {
+      code: number
+      msg: string
+      data: BookListItem[]
+      total: number
+    }
+  }
 }
