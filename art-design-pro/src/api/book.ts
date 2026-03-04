@@ -87,10 +87,10 @@ export interface BookListResponse {
 /**
  * 获取图书列表
  * @param params 搜索参数
- * @returns 图书列表响应
+ * @returns 图书列表数组
  */
 export function fetchGetBookList(params: BookSearchParams) {
-  return request.post<BookListResponse>({
+  return request.post<BookListItem[]>({
     url: '/api/book/list',
     data: params
   })

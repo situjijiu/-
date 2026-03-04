@@ -151,9 +151,11 @@ const loadBookList = async () => {
       size: pagination.size,
       ...searchParams
     }
-    const res = await fetchGetBookList(params)
-    tableData.value = res.data || []
-    pagination.total = res.total || 0
+    // 注意：HTTP工具会返回res.data.data，所以res直接就是图书列表数组
+    const bookList = await fetchGetBookList(params)
+    tableData.value = bookList || []
+    // 从响应头或其他方式获取total，这里暂时使用数组长度
+    pagination.total = bookList?.length || 0
   } catch (error) {
     console.error('加载图书列表失败:', error)
     ElMessage.error('加载图书列表失败')
