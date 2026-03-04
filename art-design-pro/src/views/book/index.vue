@@ -1,214 +1,218 @@
 <template>
-  <div class="book-manage">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <h2 class="page-title">{{ $t('menus.book.list') }}</h2>
-    </div>
-
+  <div class="book-page art-full-height">
     <!-- 搜索栏 -->
-    <BookSearch @search="handleSearch" />
+    <BookSearch v-model="searchForm" @search="handleSearch" @reset="resetSearchParams"></BookSearch>
 
-    <!-- 操作按钮 -->
-    <div class="action-bar">
-      <el-button type="primary" @click="handleAddBook">
-        <el-icon><Plus /></el-icon>
-        {{ $t('table.form.submit') }}
-      </el-button>
-      <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
-        <el-icon><Delete /></el-icon>
-        批量删除
-      </el-button>
-    </div>
-
-    <!-- 图书列表表格 -->
-    <el-table
-      v-loading="loading"
-      :data="tableData"
-      style="width: 100%"
-      @selection-change="handleSelectionChange"
-      @row-click="handleRowClick"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="title" label="书名" min-width="180" />
-      <el-table-column prop="author" label="作者" min-width="120" />
-      <el-table-column prop="isbn" label="ISBN" min-width="150" />
-      <el-table-column prop="publisher" label="出版社" min-width="150" />
-      <el-table-column prop="publishDate" label="出版日期" width="120" />
-      <el-table-column prop="price" label="价格" width="100" />
-      <el-table-column label="操作" width="150" fixed="right">
-        <template #default="scope">
-          <el-button size="small" @click="handleEditBook(scope.row)">
-            <el-icon><Edit /></el-icon>
-            编辑
-          </el-button>
-          <el-button size="small" type="danger" @click="handleDeleteBook(scope.row)">
-            <el-icon><Delete /></el-icon>
-            删除
-          </el-button>
+    <ElCard class="art-table-card" shadow="never">
+      <!-- 表格头部 -->
+      <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
+        <template #left>
+          <ElSpace wrap>
+            <ElButton @click="showDialog('add')" v-ripple>新增图书</ElButton>
+            <ElButton type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0" v-ripple>批量删除</ElButton>
+          </ElSpace>
         </template>
-      </el-table-column>
-    </el-table>
+      </ArtTableHeader>
 
-    <!-- 分页 -->
-    <div class="pagination">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+      <!-- 表格 -->
+      <ArtTable
+        :loading="loading"
+        :data="data"
+        :columns="columns"
+        :pagination="pagination"
+        @selection-change="handleSelectionChange"
+        @pagination:size-change="handleSizeChange"
+        @pagination:current-change="handleCurrentChange"
+        @row-click="handleRowClick"
+      >
+      </ArtTable>
+
+      <!-- 图书添加/编辑对话框 -->
+      <BookDialog
+        v-model:visible="dialogVisible"
+        :type="dialogType"
+        :book-data="currentBook"
+        @submit="handleDialogSubmit"
       />
-    </div>
 
-    <!-- 图书添加/编辑对话框 -->
-    <BookDialog
-      v-model="dialogVisible"
-      :book-data="currentBook"
-      @submit="handleDialogSubmit"
-    />
-
-    <!-- 图书详情对话框 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      title="书籍详情"
-      width="800px"
-    >
-      <div class="book-detail">
-        <div class="detail-header">
-          <img v-if="selectedBook?.cover" :src="selectedBook.cover" class="cover" />
-          <div class="book-info">
-            <h3>{{ selectedBook?.title }}</h3>
-            <p><strong>作者：</strong>{{ selectedBook?.author }}</p>
-            <p><strong>ISBN：</strong>{{ selectedBook?.isbn }}</p>
-            <p><strong>出版社：</strong>{{ selectedBook?.publisher }}</p>
-            <p><strong>出版日期：</strong>{{ selectedBook?.publishDate }}</p>
-            <p><strong>价格：</strong>{{ selectedBook?.price }} 元</p>
+      <!-- 图书详情对话框 -->
+      <ElDialog
+        v-model="detailDialogVisible"
+        title="书籍详情"
+        width="800px"
+        align-center
+      >
+        <div class="book-detail">
+          <div class="detail-header">
+            <ElImage v-if="selectedBook?.cover" :src="selectedBook.cover" class="cover" fit="cover" />
+            <div class="book-info">
+              <h3>{{ selectedBook?.title }}</h3>
+              <p><strong>作者：</strong>{{ selectedBook?.author }}</p>
+              <p><strong>ISBN：</strong>{{ selectedBook?.isbn }}</p>
+              <p><strong>出版社：</strong>{{ selectedBook?.publisher }}</p>
+              <p><strong>出版日期：</strong>{{ selectedBook?.publishDate }}</p>
+              <p><strong>价格：</strong>{{ selectedBook?.price }} 元</p>
+            </div>
+          </div>
+          <div class="detail-content">
+            <h4>描述</h4>
+            <p>{{ selectedBook?.description || '暂无描述' }}</p>
           </div>
         </div>
-        <div class="detail-content">
-          <h4>描述</h4>
-          <p>{{ selectedBook?.description || '暂无描述' }}</p>
-        </div>
-      </div>
-    </el-dialog>
+      </ElDialog>
+    </ElCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, h } from 'vue'
+import { ElMessage, ElMessageBox, ElImage, ElSpace, ElButton, ElCard, ElDialog } from 'element-plus'
+import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+import ArtTableHeader from '@/components/core/tables/art-table-header/index.vue'
+import ArtTable from '@/components/core/tables/art-table/index.vue'
+import { useTable } from '@/hooks/core/useTable'
 import BookSearch from './modules/book-search.vue'
 import BookDialog from './modules/book-dialog.vue'
 import { fetchGetBookList, fetchDeleteBook, type BookListItem } from '@/api/book'
+import { DialogType } from '@/types'
 
-// 加载状态
-const loading = ref(false)
+defineOptions({ name: 'Book' })
 
-// 表格数据
-const tableData = ref<BookListItem[]>([])
-
-// 分页信息
-const pagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
-})
-
-// 选中的行
-const selectedRows = ref<BookListItem[]>([])
-
-// 对话框状态
+// 弹窗相关
+const dialogType = ref<DialogType>('add')
 const dialogVisible = ref(false)
+const currentBook = ref<BookListItem | null>(null)
 
 // 详情对话框状态
 const detailDialogVisible = ref(false)
 
-// 当前编辑的图书
-const currentBook = ref<BookListItem | null>(null)
-
 // 当前选中的图书（用于详情查看）
 const selectedBook = ref<BookListItem | null>(null)
 
-// 搜索参数
-const searchParams = reactive({
-  title: '',
-  author: '',
-  isbn: ''
+// 选中的行
+const selectedRows = ref<BookListItem[]>([])
+
+// 搜索表单
+const searchForm = ref({
+  title: undefined,
+  author: undefined,
+  isbn: undefined,
+  publisher: undefined
+})
+
+const { 
+  columns, 
+  columnChecks, 
+  data, 
+  loading, 
+  pagination, 
+  getData, 
+  searchParams, 
+  resetSearchParams, 
+  handleSizeChange, 
+  handleCurrentChange, 
+  refreshData 
+} = useTable({
+  // 核心配置
+  core: {
+    apiFn: fetchGetBookList,
+    apiParams: {
+      current: 1,
+      size: 20,
+      ...searchForm.value
+    },
+    columnsFactory: () => [
+      { type: 'selection' }, // 勾选列
+      { type: 'index', width: 60, label: '序号' }, // 序号
+      {
+        prop: 'title',
+        label: '书名',
+        minWidth: 180
+      },
+      {
+        prop: 'author',
+        label: '作者',
+        minWidth: 120
+      },
+      {
+        prop: 'isbn',
+        label: 'ISBN',
+        minWidth: 150
+      },
+      {
+        prop: 'publisher',
+        label: '出版社',
+        minWidth: 150
+      },
+      {
+        prop: 'publishDate',
+        label: '出版日期',
+        width: 120
+      },
+      {
+        prop: 'price',
+        label: '价格',
+        width: 100
+      },
+      {
+        prop: 'operation',
+        label: '操作',
+        width: 120,
+        fixed: 'right', // 固定列
+        formatter: (row) =>
+          h('div', [
+            h(ArtButtonTable, {
+              type: 'edit',
+              onClick: () => showDialog('edit', row)
+            }),
+            h(ArtButtonTable, {
+              type: 'delete',
+              onClick: () => handleDeleteBook(row)
+            })
+          ])
+      }
+    ]
+  },
+  // 数据处理
+  transform: {
+    // 数据转换器
+    dataTransformer: (records) => {
+      // 类型守卫检查
+      if (!Array.isArray(records)) {
+        console.warn('数据转换器: 期望数组类型，实际收到:', typeof records)
+        return []
+      }
+
+      return records
+    }
+  }
 })
 
 /**
- * 加载图书列表
+ * 搜索处理
+ * @param params 参数
  */
-const loadBookList = async () => {
-  loading.value = true
-  try {
-    const params = {
-      current: pagination.current - 1,
-      size: pagination.size,
-      ...searchParams
+const handleSearch = (params: Record<string, any>) => {
+  console.log('搜索参数:', params)
+  // 清空搜索参数（保留分页参数）
+  Object.keys(searchParams).forEach(key => {
+    if (key !== 'current' && key !== 'size') {
+      delete (searchParams as Record<string, any>)[key]
     }
-    // 注意：HTTP工具会返回res.data.data，所以res直接就是图书列表数组
-    const bookList = await fetchGetBookList(params)
-    tableData.value = bookList || []
-    // 从响应头或其他方式获取total，这里暂时使用数组长度
-    pagination.total = bookList?.length || 0
-  } catch (error) {
-    console.error('加载图书列表失败:', error)
-    ElMessage.error('加载图书列表失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * 处理搜索
- */
-const handleSearch = (params: any) => {
+  })
+  // 搜索参数赋值
   Object.assign(searchParams, params)
-  pagination.current = 1
-  loadBookList()
+  getData()
 }
 
 /**
- * 处理选择变化
+ * 显示图书弹窗
  */
-const handleSelectionChange = (rows: BookListItem[]) => {
-  selectedRows.value = rows
-}
-
-/**
- * 处理分页大小变化
- */
-const handleSizeChange = (size: number) => {
-  pagination.size = size
-  loadBookList()
-}
-
-/**
- * 处理分页当前页变化
- */
-const handleCurrentChange = (current: number) => {
-  pagination.current = current
-  loadBookList()
-}
-
-/**
- * 处理添加图书
- */
-const handleAddBook = () => {
-  currentBook.value = null
-  dialogVisible.value = true
-}
-
-/**
- * 处理编辑图书
- */
-const handleEditBook = (row: BookListItem) => {
-  currentBook.value = { ...row }
+const showDialog = (type: DialogType, row?: BookListItem): void => {
+  console.log('打开弹窗:', { type, row })
+  
+  dialogType.value = type
+  currentBook.value = row || null
   dialogVisible.value = true
 }
 
@@ -216,19 +220,25 @@ const handleEditBook = (row: BookListItem) => {
  * 处理删除图书
  */
 const handleDeleteBook = async (row: BookListItem) => {
+  console.log('删除图书:', row)
+  
   try {
-    await ElMessageBox.confirm('确定要删除这本书吗？', '提示', {
+    await ElMessageBox.confirm(`确定要删除该图书吗？`, '删除图书', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'error'
     })
+    
+    // 调用删除图书接口
     await fetchDeleteBook({ id: row.id })
+    
     ElMessage.success('删除成功')
-    loadBookList()
-  } catch (error: any) {
-    if (error !== 'cancel' && error !== undefined) {
+    // 删除成功后刷新数据
+    await refreshData()
+  } catch (error) {
+    if (error !== 'cancel') {
       console.error('删除失败:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error('删除失败，请稍后重试')
     }
   }
 }
@@ -248,7 +258,7 @@ const handleBatchDelete = async () => {
     const ids = selectedRows.value.map((item: BookListItem) => item.id)
     await fetchDeleteBook({ id: ids })
     ElMessage.success('删除成功')
-    loadBookList()
+    await refreshData()
   } catch (error: any) {
     if (error !== 'cancel' && error !== undefined) {
       console.error('删除失败:', error)
@@ -258,11 +268,27 @@ const handleBatchDelete = async () => {
 }
 
 /**
- * 处理对话框提交
+ * 处理对话框提交事件
  */
-const handleDialogSubmit = () => {
-  dialogVisible.value = false
-  loadBookList()
+const handleDialogSubmit = async () => {
+  try {
+    // 提交成功后刷新数据
+    await refreshData()
+    
+    dialogVisible.value = false
+    currentBook.value = null
+  } catch (error) {
+    console.error('提交失败:', error)
+    ElMessage.error('提交失败，请稍后重试')
+  }
+}
+
+/**
+ * 处理表格行选择变化
+ */
+const handleSelectionChange = (selection: BookListItem[]): void => {
+  selectedRows.value = selection
+  console.log('选中行数据:', selectedRows.value)
 }
 
 /**
@@ -272,40 +298,9 @@ const handleRowClick = (row: BookListItem) => {
   selectedBook.value = { ...row }
   detailDialogVisible.value = true
 }
-
-// 初始化加载数据
-onMounted(() => {
-  loadBookList()
-})
 </script>
 
 <style scoped>
-.book-manage {
-  padding: 20px;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.action-bar {
-  margin: 20px 0;
-  display: flex;
-  gap: 10px;
-}
-
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 /* 书籍详情样式 */
 .book-detail {
   padding: 20px 0;
@@ -319,7 +314,6 @@ onMounted(() => {
 .cover {
   width: 150px;
   height: 200px;
-  object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }

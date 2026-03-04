@@ -1,94 +1,128 @@
 <template>
-  <el-dialog
+  <ElDialog
     v-model="dialogVisible"
-    :title="isEdit ? '编辑图书' : '添加图书'"
+    :title="dialogType === 'add' ? '添加图书' : '编辑图书'"
     width="600px"
+    align-center
   >
-    <el-form
-      :model="formData"
-      :rules="rules"
-      ref="formRef"
-      label-width="80px"
-    >
-      <el-form-item label="书名" prop="title">
-        <el-input v-model="formData.title" placeholder="请输入书名" />
-      </el-form-item>
-      
-      <el-form-item label="作者" prop="author">
-        <el-input v-model="formData.author" placeholder="请输入作者" />
-      </el-form-item>
-      
-      <el-form-item label="ISBN" prop="isbn">
-        <el-input v-model="formData.isbn" placeholder="请输入ISBN" />
-      </el-form-item>
-      
-      <el-form-item label="出版社" prop="publisher">
-        <el-input v-model="formData.publisher" placeholder="请输入出版社" />
-      </el-form-item>
-      
-      <el-form-item label="出版日期" prop="publishDate">
-        <el-date-picker
-          v-model="formData.publishDate"
-          type="date"
-          placeholder="选择出版日期"
-          style="width: 100%"
-        />
-      </el-form-item>
-      
-      <el-form-item label="价格" prop="price">
-        <el-input-number
-          v-model="formData.price"
-          :min="0"
-          :step="0.01"
-          :precision="2"
-          placeholder="请输入价格"
-          style="width: 100%"
-        />
-      </el-form-item>
-      
-      <el-form-item label="封面图片">
-        <el-upload
-          class="avatar-uploader"
-          :action="'/api/upload'"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload"
-        >
-          <img v-if="formData.cover" :src="formData.cover" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-        </el-upload>
-      </el-form-item>
-      
-      <el-form-item label="描述">
-        <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入书籍描述"
-        />
-      </el-form-item>
-    </el-form>
-    
+    <ElForm ref="formRef" :model="formData" :rules="rules" label-width="100px">
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <ElFormItem label="书名" prop="title">
+            <ElInput v-model="formData.title" placeholder="请输入书名" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="作者" prop="author">
+            <ElInput v-model="formData.author" placeholder="请输入作者" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <ElFormItem label="ISBN" prop="isbn">
+            <ElInput v-model="formData.isbn" placeholder="请输入ISBN" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="出版社" prop="publisher">
+            <ElInput v-model="formData.publisher" placeholder="请输入出版社" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <ElFormItem label="出版日期" prop="publishDate">
+            <ElDatePicker
+              v-model="formData.publishDate"
+              type="date"
+              placeholder="选择出版日期"
+              style="width: 100%"
+            />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="价格" prop="price">
+            <ElInputNumber
+              v-model="formData.price"
+              :min="0"
+              :step="0.01"
+              :precision="2"
+              placeholder="请输入价格"
+              style="width: 100%"
+            />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="24">
+          <ElFormItem label="封面图片">
+            <ElUpload
+              class="avatar-uploader"
+              :action="'/api/upload'"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+            >
+              <img v-if="formData.cover" :src="formData.cover" class="avatar" />
+              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            </ElUpload>
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="24">
+          <ElFormItem label="描述">
+            <ElInput
+              v-model="formData.description"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入书籍描述"
+            />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+    </ElForm>
     <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
-      </span>
+      <div class="dialog-footer">
+        <ElButton @click="dialogVisible = false">取消</ElButton>
+        <ElButton type="primary" @click="handleSubmit">提交</ElButton>
+      </div>
     </template>
-  </el-dialog>
+  </ElDialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, nextTick } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { fetchAddBook, fetchUpdateBook, type BookListItem } from '@/api/book'
 
-// 对话框可见性
-const dialogVisible = ref(false)
+interface Props {
+  visible: boolean
+  type: string
+  bookData?: BookListItem | null
+}
 
-// 表单引用
-const formRef = ref<any>(null)
+interface Emits {
+  (e: 'update:visible', value: boolean): void
+  (e: 'submit'): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+// 对话框显示控制
+const dialogVisible = computed({
+  get: () => props.visible,
+  set: (value) => emit('update:visible', value)
+})
+
+const dialogType = computed(() => props.type)
+
+// 表单实例
+const formRef = ref<FormInstance>()
 
 // 表单数据
 const formData = reactive({
@@ -103,8 +137,8 @@ const formData = reactive({
   description: ''
 })
 
-// 表单规则
-const rules = {
+// 表单验证规则
+const rules: FormRules = {
   title: [
     { required: true, message: '请输入书名', trigger: 'blur' }
   ],
@@ -125,42 +159,43 @@ const rules = {
   ]
 }
 
-// 图书数据
-const props = defineProps({
-  bookData: {
-    type: Object as () => BookListItem | null,
-    default: null
-  }
-})
+/**
+ * 初始化表单数据
+ * 根据对话框类型（新增/编辑）填充表单
+ */
+const initFormData = () => {
+  const isEdit = props.type === 'edit' && props.bookData
+  const row = props.bookData
 
-// 事件
-const emit = defineEmits(['update:modelValue', 'submit'])
+  Object.assign(formData, {
+    id: isEdit && row ? row.id || 0 : 0,
+    title: isEdit && row ? row.title || '' : '',
+    author: isEdit && row ? row.author || '' : '',
+    isbn: isEdit && row ? row.isbn || '' : '',
+    publisher: isEdit && row ? row.publisher || '' : '',
+    publishDate: isEdit && row ? row.publishDate || '' : '',
+    price: isEdit && row ? row.price || 0 : 0,
+    cover: isEdit && row ? row.cover || '' : '',
+    description: isEdit && row ? row.description || '' : ''
+  })
+}
 
-// 是否为编辑模式
-const isEdit = computed(() => !!props.bookData?.id)
-
-// 监听bookData变化
-watch(() => props.bookData, (newVal) => {
-  if (newVal) {
-    Object.assign(formData, newVal)
-  } else {
-    // 重置表单
-    formData.id = 0
-    formData.title = ''
-    formData.author = ''
-    formData.isbn = ''
-    formData.publisher = ''
-    formData.publishDate = ''
-    formData.price = 0
-    formData.cover = ''
-    formData.description = ''
-  }
-}, { deep: true, immediate: true })
-
-// 监听dialogVisible变化
-watch(dialogVisible, (newVal) => {
-  emit('update:modelValue', newVal)
-})
+/**
+ * 监听对话框状态变化
+ * 当对话框打开时初始化表单数据并清除验证状态
+ */
+watch(
+  () => [props.visible, props.type, props.bookData],
+  ([visible]) => {
+    if (visible) {
+      initFormData()
+      nextTick(() => {
+        formRef.value?.clearValidate()
+      })
+    }
+  },
+  { immediate: true }
+)
 
 /**
  * 处理封面上传成功
@@ -191,24 +226,27 @@ const beforeAvatarUpload = (file: File) => {
  */
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
-  try {
-    await formRef.value.validate()
-    
-    if (isEdit.value) {
-      // 编辑图书
-      await fetchUpdateBook(formData)
-      ElMessage.success('编辑成功')
-    } else {
-      // 添加图书
-      await fetchAddBook(formData)
-      ElMessage.success('添加成功')
+
+  await formRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        if (dialogType.value === 'add') {
+          // 添加图书
+          await fetchAddBook(formData)
+          ElMessage.success('添加成功')
+        } else {
+          // 编辑图书
+          await fetchUpdateBook(formData)
+          ElMessage.success('更新成功')
+        }
+        dialogVisible.value = false
+        emit('submit')
+      } catch (error) {
+        console.error('提交失败:', error)
+        ElMessage.error('提交失败，请稍后重试')
+      }
     }
-    
-    emit('submit')
-  } catch (error) {
-    console.error('提交失败:', error)
-  }
+  })
 }
 </script>
 

@@ -1,133 +1,96 @@
 <template>
-  <div class="book-search">
-    <el-card shadow="never">
-      <template #header>
-        <div class="card-header">
-          <span>{{ $t('table.searchBar.search') }}</span>
-          <el-button
-            type="text"
-            @click="handleExpandOrCollapse"
-            :class="{ 'is-expanded': isExpanded }"
-          >
-            {{ isExpanded ? $t('table.searchBar.collapse') : $t('table.searchBar.expand') }}
-          </el-button>
-        </div>
-      </template>
-      <el-form
-        :inline="true"
-        :model="searchForm"
-        @keyup.enter="handleSearch"
-      >
-        <el-form-item label="书名">
-          <el-input
-            v-model="searchForm.title"
-            placeholder="请输入书名"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="作者">
-          <el-input
-            v-model="searchForm.author"
-            placeholder="请输入作者"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="ISBN">
-          <el-input
-            v-model="searchForm.isbn"
-            placeholder="请输入ISBN"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item v-if="isExpanded">
-          <el-input
-            v-model="searchForm.publisher"
-            placeholder="请输入出版社"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">
-            {{ $t('table.searchBar.search') }}
-          </el-button>
-          <el-button @click="handleReset">
-            {{ $t('table.searchBar.reset') }}
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-  </div>
+  <ArtSearchBar
+    ref="searchBarRef"
+    v-model="formData"
+    :items="formItems"
+    :rules="rules"
+    @reset="handleReset"
+    @search="handleSearch"
+    @keyup.enter="handleSearch"
+  >
+  </ArtSearchBar>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, computed } from 'vue'
+import ArtSearchBar from '@/components/core/forms/art-search-bar/index.vue'
+  
+interface Props {
+  modelValue: Record<string, any>
+}
+interface Emits {
+  (e: 'update:modelValue', value: Record<string, any>): void
+  (e: 'search', params: Record<string, any>): void
+  (e: 'reset'): void
+}
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
-// 搜索表单
-const searchForm = reactive({
-  title: '',
-  author: '',
-  isbn: '',
-  publisher: ''
+// 表单数据双向绑定
+const searchBarRef = ref()
+const formData = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
 })
 
-// 是否展开
-const isExpanded = ref(false)
+// 校验规则
+const rules = {
+  // 可添加校验规则
+}
 
-// 搜索事件
-const emit = defineEmits(['search'])
+// 表单配置
+const formItems = computed(() => [
+  {
+    label: '书名',
+    key: 'title',
+    type: 'input',
+    placeholder: '请输入书名',
+    clearable: true
+  },
+  {
+    label: '作者',
+    key: 'author',
+    type: 'input',
+    placeholder: '请输入作者',
+    clearable: true
+  },
+  {
+    label: 'ISBN',
+    key: 'isbn',
+    type: 'input',
+    placeholder: '请输入ISBN',
+    clearable: true
+  },
+  {
+    label: '出版社',
+    key: 'publisher',
+    type: 'input',
+    placeholder: '请输入出版社',
+    clearable: true
+  }
+])
 
-/**
- * 处理搜索
- */
-const handleSearch = () => {
+// 事件
+function handleReset() {
+  console.log('重置表单')
+  emit('reset')
+}
+
+async function handleSearch() {
+  await searchBarRef.value.validate()
+  
   // 过滤空参数
-  const params = Object.entries(searchForm).reduce((acc, [key, value]) => {
-    if (value) {
-      acc[key] = value
-    }
-    return acc
-  }, {} as any)
-  emit('search', params)
-}
-
-/**
- * 处理重置
- */
-const handleReset = () => {
-  Object.keys(searchForm).forEach(key => {
-    searchForm[key as keyof typeof searchForm] = ''
-  })
-  emit('search', {})
-}
-
-/**
- * 处理展开/收起
- */
-const handleExpandOrCollapse = () => {
-  isExpanded.value = !isExpanded.value
+  const searchParams = { ...formData.value }
+  const filteredParams = Object.fromEntries(
+    Object.entries(searchParams).filter(([_, value]) => {
+      // 过滤掉 undefined、null、空字符串
+      return value !== undefined && value !== null && value !== ''
+    })
+  )
+  
+  console.log('原始参数:', searchParams)
+  console.log('过滤后参数:', filteredParams)
+  
+  emit('search', filteredParams)
 }
 </script>
-
-<style scoped>
-.book-search {
-  margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.is-expanded {
-  color: var(--el-color-primary);
-}
-</style>
