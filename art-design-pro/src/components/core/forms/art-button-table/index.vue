@@ -6,7 +6,7 @@
       buttonClass
     ]"
     :style="{ backgroundColor: buttonBgColor, color: iconColor }"
-    @click="handleClick"
+    @click="handleClick($event)"
   >
     <ArtSvgIcon :icon="iconContent" />
   </div>
@@ -31,7 +31,7 @@
   const props = withDefaults(defineProps<Props>(), {})
 
   const emit = defineEmits<{
-    (e: 'click'): void
+    (e: 'click', event: MouseEvent): void
   }>()
 
   // 默认按钮配置
@@ -53,7 +53,7 @@
     return props.iconClass || (props.type ? defaultButtons[props.type]?.class : '') || ''
   })
 
-  const handleClick = () => {
-    emit('click')
+  const handleClick = (event: MouseEvent) => {
+    emit('click', event)
   }
 </script>

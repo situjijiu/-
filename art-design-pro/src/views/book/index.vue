@@ -44,7 +44,7 @@
       >
         <div class="book-detail">
           <div class="detail-header">
-            <ElImage v-if="selectedBook?.cover" :src="selectedBook.cover" class="cover" fit="cover" />
+            <ElImage v-if="selectedBook?.cover" :src="'/api/book/cover/' + selectedBook.cover.split('/').pop()" class="cover" fit="cover" />
             <div class="book-info">
               <h3>{{ selectedBook?.title }}</h3>
               <p><strong>作者：</strong>{{ selectedBook?.author }}</p>
@@ -162,15 +162,23 @@ const {
         label: '操作',
         width: 120,
         fixed: 'right', // 固定列
-        formatter: (row) =>
+        formatter: (row: BookListItem) =>
           h('div', [
             h(ArtButtonTable, {
               type: 'edit',
-              onClick: () => showDialog('edit', row)
+              onClick: (event: MouseEvent) => {
+                // 阻止事件冒泡，避免触发行点击事件
+                event.stopPropagation();
+                showDialog('edit', row)
+              }
             }),
             h(ArtButtonTable, {
               type: 'delete',
-              onClick: () => handleDeleteBook(row)
+              onClick: (event: MouseEvent) => {
+                // 阻止事件冒泡，避免触发行点击事件
+                event.stopPropagation();
+                handleDeleteBook(row)
+              }
             })
           ])
       }

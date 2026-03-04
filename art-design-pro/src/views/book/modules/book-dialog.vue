@@ -59,12 +59,12 @@
           <ElFormItem label="封面图片">
             <ElUpload
               class="avatar-uploader"
-              :action="'/api/upload'"
+              :action="'/api/book/upload'"
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
             >
-              <img v-if="formData.cover" :src="formData.cover" class="avatar" />
+              <img v-if="formData.cover" :src="'/api/book/cover/' + formData.cover.split('/').pop()" class="avatar" />
               <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
             </ElUpload>
           </ElFormItem>
