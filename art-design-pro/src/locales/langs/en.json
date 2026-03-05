@@ -242,6 +242,14 @@
       "role": "Role Manage",
       "userCenter": "User Center",
       "menu": "Menu Manage"
+    },
+    "book": {
+      "title": "Book Manage",
+      "list": "Book List"
+    },
+    "bookDisplay": {
+      "title": "Book Display",
+      "list": "Book List"
     }
   },
   "table": {

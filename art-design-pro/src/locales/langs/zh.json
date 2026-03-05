@@ -246,6 +246,10 @@
     "book": {
       "title": "图书管理",
       "list": "书籍列表"
+    },
+    "bookDisplay": {
+      "title": "图书展示",
+      "list": "图书列表"
     }
   },
   "table": {

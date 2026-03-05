@@ -55,6 +55,9 @@
   import { computed, nextTick, ref } from 'vue'
   import multiavatar from '@multiavatar/multiavatar'
 
+  // 缓存用户名对应的头像URL，避免重复调用multiavatar
+  const avatarCache = ref<Record<string, string>>({})
+
   defineOptions({ name: 'User' })
 
   type UserListItem = Api.SystemManage.UserListItem
@@ -136,10 +139,15 @@
           width: 280,
           // visible: false, // 默认是否显示列
           formatter: (row) => {
-            // 使用multiavatar根据用户名生成SVG头像
-            const svgCode = multiavatar(row.username)
-            // 将SVG代码转换为data URL
-            const avatarUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+            // 先检查缓存中是否已有该用户名的头像
+            if (!avatarCache.value[row.username]) {
+              // 使用multiavatar根据用户名生成SVG头像
+              const svgCode = multiavatar(row.username)
+              // 将SVG代码转换为data URL
+              avatarCache.value[row.username] = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+            }
+            
+            const avatarUrl = avatarCache.value[row.username]
             
             return h('div', { class: 'user flex-c' }, [
               h(ElImage, {

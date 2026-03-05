@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, reactive, onMounted } from 'vue'
   import multiavatar from '@multiavatar/multiavatar/esm'
 
   interface UserTableItem {
@@ -68,13 +69,20 @@
   const ANIMATION_DELAY = 100
 
   const radio2 = ref('本月')
+  
+  // 缓存用户名对应的头像URL，避免重复调用multiavatar
+  const avatarCache = ref<Record<string, string>>({})
 
   /**
    * 根据用户名生成头像
    */
   const getAvatarUrl = (username: string) => {
-    const svgCode = multiavatar(username)
-    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+    // 先检查缓存中是否已有该用户名的头像
+    if (!avatarCache.value[username]) {
+      const svgCode = multiavatar(username)
+      avatarCache.value[username] = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`
+    }
+    return avatarCache.value[username]
   }
 
   /**

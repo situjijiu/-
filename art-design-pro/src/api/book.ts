@@ -87,10 +87,10 @@ export interface BookListResponse {
 /**
  * 获取图书列表
  * @param params 搜索参数
- * @returns 图书列表数组
+ * @returns 图书列表响应
  */
 export function fetchGetBookList(params: BookSearchParams) {
-  return request.post<BookListItem[]>({
+  return request.post<BookListResponse>({
     url: '/api/book/list',
     data: params
   })
@@ -129,5 +129,19 @@ export function fetchDeleteBook(params: DeleteBookParams) {
   return request.del<BookResponse>({
     url: '/api/book/delete',
     params
+  })
+}
+
+/**
+ * 获取图书封面
+ * @param coverPath 封面路径
+ * @returns 封面图片
+ */
+export function fetchGetBookCover(coverPath: string) {
+  // 提取文件名
+  const filename = coverPath.split('/').pop()
+  return request.get<Blob>({
+    url: `/api/book/cover/${filename}`,
+    responseType: 'blob'
   })
 }
