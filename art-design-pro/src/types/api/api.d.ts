@@ -70,6 +70,7 @@ declare namespace Api {
 
     /** 登录响应 */
     interface LoginResponse {
+      data: { token: any; refreshToken: any }
       token: string
       refreshToken: string
     }
@@ -128,6 +129,7 @@ declare namespace Api {
   namespace User {
     /** 用户信息 */
     interface UserInfo {
+      data: any
       realName?: string
       username: string
       buttons: string[]

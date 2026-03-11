@@ -151,7 +151,7 @@
   import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage } from 'element-plus'
 import { fetchGetUserInfo, fetchUpdateUserInfo, fetchChangePassword } from '@/api/user'
-  import multiavatar from '@multiavatar/multiavatar/esm'
+  import multiavatar from '@multiavatar/multiavatar'
 
   defineOptions({ name: 'UserCenter' })
 
@@ -274,18 +274,33 @@ import { fetchGetUserInfo, fetchUpdateUserInfo, fetchChangePassword } from '@/ap
   /**
    * 获取用户信息
    */
-  const getUserInfo = async () => {
+  const getUserInfo = async (forceRefresh = false) => {
     try {
+      // 优先使用 userStore 中已存储的用户信息
+      const storedUserInfo = userStore.getUserInfo
+      if (storedUserInfo.username && !forceRefresh) {
+        // 填充表单数据
+        form.realName = storedUserInfo.realName || ''
+        form.nikeName = storedUserInfo.username || ''
+        form.email = storedUserInfo.email || ''
+        form.mobile = storedUserInfo.phone || ''
+        form.address = storedUserInfo.address || ''
+        form.sex = storedUserInfo.sex || '1'
+        form.des = storedUserInfo.signature || ''
+        return
+      }
+
+      // 当用户信息不存在或需要强制刷新时，发送请求获取
       loading.value = true
       const info = await fetchGetUserInfo()
       // 填充表单数据
-      form.realName = info.realName || ''
-      form.nikeName = info.username || ''
-      form.email = info.email || ''
-      form.mobile = info.phone || ''
-      form.address = info.address || ''
-      form.sex = info.sex || '1'
-      form.des = info.signature || '' 
+      form.realName = info.data.realName || ''
+      form.nikeName = info.data.username || ''
+      form.email = info.data.email || ''
+      form.mobile = info.data.phone || ''
+      form.address = info.data.address || ''
+      form.sex = info.data.sex || '1'
+      form.des = info.data.signature || '' 
     } catch (error) {
       console.error('获取用户信息失败:', error)
     } finally {
@@ -312,7 +327,7 @@ import { fetchGetUserInfo, fetchUpdateUserInfo, fetchChangePassword } from '@/ap
           signature: form.des
         })
         // 更新成功后重新获取用户信息
-        await getUserInfo()
+        await getUserInfo(true)
         ElMessage.success('更新成功')
       } catch (error) {
         console.error('更新用户信息失败:', error)

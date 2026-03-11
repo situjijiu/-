@@ -59,7 +59,7 @@ export const useUserStore = defineStore(
     // 锁屏密码
     const lockPassword = ref('')
     // 用户信息
-    const info = ref<Partial<Api.Auth.UserInfo>>({})
+    const info = ref<Partial<Api.User.UserInfo>>({})
     // 搜索历史记录
     const searchHistory = ref<AppRouteRecord[]>([])
     // 访问令牌
@@ -78,7 +78,7 @@ export const useUserStore = defineStore(
      * 设置用户信息
      * @param newInfo 新的用户信息
      */
-    const setUserInfo = (newInfo: Api.Auth.UserInfo) => {
+    const setUserInfo = (newInfo: Api.User.UserInfo) => {
       info.value = newInfo
     }
 

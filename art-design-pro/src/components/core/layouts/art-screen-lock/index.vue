@@ -114,7 +114,7 @@
   import { useUserStore } from '@/store/modules/user'
   import { mittBus } from '@/utils/sys'
   import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-  import multiavatar from '@multiavatar/multiavatar/esm'
+  import multiavatar from '@multiavatar/multiavatar'
 
   // 国际化
   const { t } = useI18n()

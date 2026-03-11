@@ -109,13 +109,16 @@
 </template>
 
 <script setup lang="ts">
-  import AppConfig from '@/config'
-  import { useUserStore } from '@/store/modules/user'
-  import { useI18n } from 'vue-i18n'
-  import { HttpError } from '@/utils/http/error'
-  import { fetchLogin } from '@/api/auth'
-  import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
-  import { useSettingStore } from '@/store/modules/setting'
+  import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import AppConfig from '@/config'
+import { useUserStore } from '@/store/modules/user'
+import { useI18n } from 'vue-i18n'
+import { HttpError } from '@/utils/http/error'
+import { fetchLogin } from '@/api/auth'
+import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
+import { useSettingStore } from '@/store/modules/setting'
 
   defineOptions({ name: 'Login' })
 
@@ -174,7 +177,7 @@
   const systemName = AppConfig.systemInfo.name
   const formRef = ref<FormInstance>()
 
-  const formData = reactive({
+  const formData = ref({
     account: '',
     username: '',
     password: '',
@@ -195,9 +198,9 @@
   // 设置账号
   const setupAccount = (key: AccountKey) => {
     const selectedAccount = accounts.value.find((account: Account) => account.key === key)
-    formData.account = key
-    formData.username = selectedAccount?.userName ?? ''
-    formData.password = selectedAccount?.password ?? ''
+    formData.value.account = key
+    formData.value.username = selectedAccount?.userName ?? ''
+    formData.value.password = selectedAccount?.password ?? ''
   }
 
   // 登录
@@ -219,14 +222,15 @@
       loading.value = true
 
       // 登录请求
-      const { username, password } = formData
+      const { username, password } = formData.value
 
-      const { token, refreshToken } = await fetchLogin({
+      const response = await fetchLogin({
         username: username.toLowerCase(),
         password
       })
 
       // 验证token
+      const { token, refreshToken } = response.data
       if (!token) {
         throw new Error('Login failed - no token received')
       }
@@ -240,14 +244,27 @@
 
       // 获取 redirect 参数，如果存在则跳转到指定页面，否则跳转到首页
       const redirect = route.query.redirect as string
+      console.log('Login success, redirecting to:', redirect || '/')
       router.push(redirect || '/')
     } catch (error) {
       // 处理 HttpError
       if (error instanceof HttpError) {
-        // console.log(error.code)
+        ElNotification({
+          title: t('login.error.title'),
+          type: 'error',
+          duration: 2500,
+          zIndex: 10000,
+          message: error.message || t('login.error.message')
+        })
       } else {
         // 处理非 HttpError
-        // ElMessage.error('登录失败，请稍后重试')
+        ElNotification({
+          title: t('login.error.title'),
+          type: 'error',
+          duration: 2500,
+          zIndex: 10000,
+          message: t('login.error.message')
+        })
         console.error('[Login] Unexpected error:', error)
       }
     } finally {

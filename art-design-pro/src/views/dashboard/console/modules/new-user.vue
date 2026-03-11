@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
   import { ref, reactive, onMounted } from 'vue'
-  import multiavatar from '@multiavatar/multiavatar/esm'
+  import multiavatar from '@multiavatar/multiavatar'
 
   interface UserTableItem {
     username: string

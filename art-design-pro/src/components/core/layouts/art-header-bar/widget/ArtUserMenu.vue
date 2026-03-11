@@ -67,7 +67,7 @@
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
   import { computed, ref } from 'vue'
-  import multiavatar from '@multiavatar/multiavatar/esm'
+  import multiavatar from '@multiavatar/multiavatar'
 
   defineOptions({ name: 'ArtUserMenu' })
 
