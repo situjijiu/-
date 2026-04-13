@@ -1,11 +1,5 @@
 <template>
-  <div class="book-display-page art-full-height">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <h1>图书展示</h1>
-      <p>浏览我们的图书收藏</p>
-    </div>
-
+  <div class="book-display-page">
     <!-- 搜索栏 -->
     <div class="search-section">
       <ArtSearchBar
@@ -19,56 +13,47 @@
       />
     </div>
 
-    <!-- 图书卡片列表 -->
-    <div class="book-cards-container">
-      <el-skeleton :loading="loading" animated>
-        <template #template>
-          <div v-for="i in 6" :key="i" class="book-card-skeleton">
-            <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
-            <el-skeleton-item variant="p" style="width: 80%" />
-            <el-skeleton-item variant="text" style="width: 60%" />
-            <el-skeleton-item variant="text" style="width: 40%" />
-          </div>
-        </template>
-        <template #default>
-          <div v-for="book in bookList" :key="book.id" class="book-card">
-            <el-card shadow="hover" :body-style="{ padding: '0' }">
-              <div class="book-card-header">
-                <el-image
-                  :src="'/api/book/cover/' + book.cover.split('/').pop()"
-                  fit="cover"
-                  class="book-cover"
-                />
-              </div>
-              <div class="book-card-body">
-                <h3 class="book-title">{{ book.title }}</h3>
-                <p class="book-author">作者：{{ book.author }}</p>
-                <p class="book-publisher">出版社：{{ book.publisher }}</p>
-                <p class="book-price">价格：{{ book.price.toFixed(2) }} 元</p>
-                <div class="book-actions">
-                  <el-button type="primary" size="small" @click="viewBookDetail(book)">
-                    查看详情
-                  </el-button>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </template>
-      </el-skeleton>
-    </div>
+    <ElCard class="art-table-card" shadow="never">
+      <!-- 图书卡片列表 -->
+      <div class="book-cards-container">
+        <el-skeleton :loading="loading" animated>
+          <template #template>
+            <div v-for="i in 6" :key="i" class="book-card-skeleton">
+              <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
+              <el-skeleton-item variant="p" style="width: 80%" />
+              <el-skeleton-item variant="text" style="width: 60%" />
+              <el-skeleton-item variant="text" style="width: 40%" />
+            </div>
+          </template>
+          <template #default>
+            <div v-for="book in bookList" :key="book.id" class="book-card">
+              <ArtImageCard
+                :image-url="'/api/book/cover/' + book.cover.split('/').pop()"
+                :title="book.title"
+                :category="book.publisher"
+                :date="book.publishDate"
+                @click="viewBookDetail(book)"
+              />
+              <div class="book-price">价格：{{ book.price.toFixed(2) }} 元</div>
+              <div class="book-author">作者：{{ book.author }}</div>
+            </div>
+          </template>
+        </el-skeleton>
+      </div>
 
-    <!-- 分页 -->
-    <div class="pagination-section">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[12, 24, 36]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-section">
+        <el-pagination
+          v-model:current-page="pagination.current"
+          v-model:page-size="pagination.size"
+          :page-sizes="[12, 24, 36]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </ElCard>
 
     <!-- 图书详情对话框 -->
     <el-dialog
@@ -105,8 +90,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElCard } from 'element-plus'
 import ArtSearchBar from '@/components/core/forms/art-search-bar/index.vue'
+import ArtImageCard from '@/components/core/cards/art-image-card/index.vue'
 import { fetchGetBookList, type BookListItem } from '@/api/book'
 
 // 搜索表单
@@ -264,7 +250,6 @@ initData()
 .book-display-page {
   padding: 20px;
   background-color: #f5f7fa;
-  min-height: 100vh;
 }
 
 .page-header {
@@ -285,7 +270,7 @@ initData()
 }
 
 .search-section {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 8px;
@@ -308,68 +293,26 @@ initData()
 
 .book-card {
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .book-card:hover {
   transform: translateY(-5px);
 }
 
-.book-card-header {
-  height: 200px;
-  overflow: hidden;
-  border-radius: 8px 8px 0 0;
-}
-
-.book-cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.book-card:hover .book-cover {
-  transform: scale(1.05);
-}
-
-.book-card-body {
-  padding: 16px;
-}
-
-.book-title {
+.book-price {
   font-size: 16px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: #303133;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  color: #f56c6c;
+  margin: 10px 0 5px 0;
+  text-align: center;
 }
 
 .book-author {
   font-size: 14px;
   color: #606266;
-  margin: 0 0 4px 0;
-}
-
-.book-publisher {
-  font-size: 14px;
-  color: #606266;
-  margin: 0 0 4px 0;
-}
-
-.book-price {
-  font-size: 16px;
-  font-weight: 600;
-  color: #f56c6c;
-  margin: 10px 0 16px 0;
-}
-
-.book-actions {
-  display: flex;
-  justify-content: flex-end;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .pagination-section {
