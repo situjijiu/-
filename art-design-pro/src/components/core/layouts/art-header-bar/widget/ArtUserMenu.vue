@@ -64,6 +64,7 @@
   import { useRouter } from 'vue-router'
   import { ElMessageBox } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
+  import { storeToRefs } from 'pinia'
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
   import { computed, ref } from 'vue'

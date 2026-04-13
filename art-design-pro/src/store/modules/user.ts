@@ -164,15 +164,19 @@ export const useUserStore = defineStore(
       sessionStorage.removeItem('iframeRoutes')
       // 清空主页路径
       useMenuStore().setHomePath('')
-      // 重置路由状态
-      resetRouterState(500)
+      
       // 跳转到登录页，携带当前路由作为 redirect 参数
       const currentRoute = router.currentRoute.value
-      const redirect = currentRoute.path !== '/login' ? currentRoute.fullPath : undefined
+      const redirect = currentRoute.path !== '/auth/login' ? currentRoute.fullPath : undefined
+      
+      // 立即跳转到登录页
       router.push({
         name: 'Login',
         query: redirect ? { redirect } : undefined
       })
+      
+      // 重置路由状态（延迟执行，避免影响跳转）
+      resetRouterState(1000)
     }
 
     /**
