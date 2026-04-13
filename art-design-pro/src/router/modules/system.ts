@@ -40,6 +40,16 @@ export const systemRoutes: AppRouteRecord = {
         keepAlive: true,
         isHideTab: true
       }
+    },
+    {
+      path: 'borrow-rule',
+      name: 'BorrowRule',
+      component: '/system/borrow-rule',
+      meta: {
+        title: 'menus.system.borrowRule',
+        keepAlive: true,
+        roles: ['R_SUPER', 'R_ADMIN']
+      }
     }
 
   ]
