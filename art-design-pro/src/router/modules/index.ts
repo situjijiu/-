@@ -3,6 +3,7 @@ import { dashboardRoutes } from './dashboard'
 import { systemRoutes } from './system'
 import { bookRoutes } from './book'
 import { bookDisplayRoutes } from './book-display'
+import { borrowRoutes } from './borrow'
 import { resultRoutes } from './result'
 import { exceptionRoutes } from './exception'
 
@@ -14,6 +15,7 @@ export const routeModules: AppRouteRecord[] = [
   systemRoutes,
   bookRoutes,
   bookDisplayRoutes,
+  borrowRoutes,
   resultRoutes,
   exceptionRoutes
 ]

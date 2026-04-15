@@ -91,13 +91,13 @@ export class MenuProcessor {
       // 确定用户是否有权限
       let hasPermission = true
       if (itemRoles && itemRoles.length > 0) {
-        // 普通用户（USER）只能访问无角色限制的菜单
+        // 普通用户（USER）可以访问标记为 R_USER 的菜单
         if (userRole === 'USER') {
-          hasPermission = false
+          hasPermission = itemRoles.includes('R_USER')
         } 
-        // 管理员（ADMIN）和超级管理员（SUPER_ADMIN）可以访问标记为 R_ADMIN 或 R_SUPER 的菜单
+        // 管理员（ADMIN）可以访问标记为 R_ADMIN、R_SUPER 或 R_USER 的菜单
         else if (userRole === 'ADMIN') {
-          hasPermission = itemRoles.includes('R_ADMIN') || itemRoles.includes('R_SUPER')
+          hasPermission = itemRoles.includes('R_ADMIN') || itemRoles.includes('R_SUPER') || itemRoles.includes('R_USER')
         } 
         // 超级管理员（SUPER_ADMIN）可以访问所有菜单
         else if (userRole === 'SUPER_ADMIN') {

@@ -145,3 +145,14 @@ export function fetchGetBookCover(coverPath: string) {
     responseType: 'blob'
   })
 }
+
+/**
+ * 获取图书详情
+ * @param id 图书ID
+ * @returns 图书详情响应
+ */
+export function fetchGetBookDetail(id: number) {
+  return request.get<BookResponse>({
+    url: `/api/book/${id}`
+  })
+}

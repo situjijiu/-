@@ -245,8 +245,12 @@
       "borrowRule": "借阅规则"
     },
     "book": {
-      "title": "图书管理",
+      "title": "书籍管理",
       "list": "书籍列表"
+    },
+    "borrow": {
+      "title": "借阅管理",
+      "list": "借阅记录"
     },
     "bookDisplay": {
       "title": "图书展示",
